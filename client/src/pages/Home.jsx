@@ -30,19 +30,7 @@ export default function Home() {
           1. HERO SECTION — 100vh, no sticky tricks, always visible
           Scroll animation: as hero exits viewport, shoe rotates.
           ═══════════════════════════════════════════════════════════ */}
-      <section
-        className="home-hero"
-        style={{
-          height: '100vh',
-          minHeight: '600px',
-          position: 'relative',
-          backgroundColor: 'var(--bg-secondary)',
-          borderBottom: '1px solid var(--border-light)',
-          display: 'flex',
-          alignItems: 'center',
-          overflow: 'hidden',
-        }}
-      >
+      <section className="home-hero">
         {/* Background ambient orbs */}
         <div className="hero-orb hero-orb--r" />
         <div className="hero-orb hero-orb--l" />
@@ -82,13 +70,8 @@ export default function Home() {
 
             <div className="home-hero__scroll-hint">
               <span className="home-hero__scroll-line" />
-              <span>Scroll to explore 360°</span>
+              <span>Scroll to explore</span>
             </div>
-          </div>
-
-          {/* ── RIGHT: Rotating Sneaker Canvas ── */}
-          <div className="home-hero__canvas-wrap">
-            <RotatingBanner />
           </div>
 
         </div>
@@ -223,6 +206,21 @@ export default function Home() {
           HOME-SCOPED STYLES
           ═══════════════════════════════════════════════════════════ */}
       <style>{`
+        .home-hero {
+          height: 100vh;
+          min-height: 600px;
+          position: relative;
+          background-color: var(--bg-secondary);
+          border-bottom: 1px solid var(--border-light);
+          display: flex;
+          align-items: center;
+          overflow: hidden;
+          background-image: url("/banner/frame_001.png");
+          background-position: right 8% center;
+          background-size: 46%;
+          background-repeat: no-repeat;
+        }
+
         /* ── Hero layout ── */
         .home-hero__inner {
           max-width: 1400px;
@@ -400,17 +398,21 @@ export default function Home() {
            RESPONSIVE
            ════════════════════════════════ */
         @media (max-width: 900px) {
+          .home-hero {
+            background-position: center bottom 6%;
+            background-size: 55%;
+          }
           .home-hero__inner {
             padding: 0 24px;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-start;
+            padding-top: 60px;
             text-align: center;
             gap: 12px;
           }
           .home-hero__text {
             width: 100%;
             max-width: 100%;
-            order: 2;
           }
           .home-hero__sub {
             margin-left: auto;
@@ -422,21 +424,14 @@ export default function Home() {
           .home-hero__scroll-hint {
             justify-content: center;
           }
-          .home-hero__canvas-wrap {
-            order: 1;
-            width: 100%;
-            height: 44vw;
-            min-height: 240px;
-            max-height: 360px;
-          }
           .home-hero__h1 {
             font-size: clamp(2.4rem, 8vw, 4rem);
           }
         }
 
         @media (max-width: 480px) {
-          .home-hero__canvas-wrap {
-            height: 55vw;
+          .home-hero {
+            background-size: 70%;
           }
         }
       `}</style>
