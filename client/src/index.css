@@ -1,0 +1,288 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+:root {
+  /* Apple Theme Colors (Light Mode by default) */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f5f7;
+  --bg-tertiary: #fafafa;
+  --bg-glass: rgba(255, 255, 255, 0.85);
+  
+  /* Nike Branding Accents */
+  --accent-orange: #ff5500;
+  --accent-orange-hover: #e04b00;
+  
+  /* Dark Contrast Colors */
+  --bg-dark: #000000;
+  --bg-dark-secondary: #111111;
+  --bg-dark-tertiary: #1c1c1e;
+  --bg-dark-glass: rgba(0, 0, 0, 0.85);
+
+  /* Typography */
+  --text-main: #1d1d1f;
+  --text-muted: #86868b;
+  --text-dark: #1d1d1f;
+  --text-light: #f5f5f7;
+  
+  /* Borders and Shadows (Apple Clean UI) */
+  --border-light: rgba(0, 0, 0, 0.08);
+  --border-dark: rgba(255, 255, 255, 0.12);
+  --border-glass: rgba(0, 0, 0, 0.06);
+  
+  --shadow-subtle: 0 4px 20px rgba(0, 0, 0, 0.03);
+  --shadow-apple: 0 8px 30px rgba(0, 0, 0, 0.06);
+  --shadow-nike: 0 15px 35px rgba(0, 0, 0, 0.12);
+  
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  
+  --transition-smooth: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+  --transition-fast: all 0.2s ease;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-sans);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--text-main);
+}
+
+/* Custom Scrollbar (Apple Style) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* High Contrast Section Classes */
+.light-section {
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+}
+
+.dark-section {
+  background-color: var(--bg-dark);
+  color: var(--text-light);
+}
+.dark-section h1,
+.dark-section h2,
+.dark-section h3,
+.dark-section h4 {
+  color: var(--text-light);
+}
+
+/* Redefined legacy names for full compatibility */
+
+/* Glassmorphism Panel (Apple-style frosted glass) */
+.glass-panel {
+  background: var(--bg-glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-light);
+  border-radius: 18px;
+  box-shadow: var(--shadow-subtle);
+}
+
+/* Apple-style clean card with Nike-style strong hover drop shadow & scale */
+.glass-panel-glow-cyan {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  box-shadow: var(--shadow-subtle);
+  transition: var(--transition-smooth);
+}
+.glass-panel-glow-cyan:hover {
+  box-shadow: var(--shadow-apple);
+  transform: translateY(-4px);
+  border-color: rgba(0, 0, 0, 0.15);
+}
+
+/* Limited Edition / Pink highlight - Nike Bold styling */
+.glass-panel-glow-pink {
+  background: var(--bg-dark);
+  color: var(--text-light);
+  border: 1px solid var(--border-dark);
+  border-radius: 12px;
+  box-shadow: var(--shadow-subtle);
+  transition: var(--transition-smooth);
+}
+.glass-panel-glow-pink:hover {
+  box-shadow: var(--shadow-nike);
+  transform: translateY(-4px);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+.glass-panel-glow-pink h3 {
+  color: var(--text-light);
+}
+
+/* Floating Animations */
+@keyframes float {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(1deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; }
+}
+.animate-pulse-glow {
+  animation: pulse-glow 2.5s ease-in-out infinite;
+}
+
+/* Nike Bold Heading (uppercase, compressed, black) */
+.nike-title-main {
+  font-size: 64px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.04em;
+  line-height: 0.95;
+}
+
+/* Gradient Text - converted to Solid Bold Dark / High Contrast */
+.gradient-text-pink-cyan {
+  color: var(--text-main);
+  background: none;
+  -webkit-background-clip: unset;
+  -webkit-text-fill-color: unset;
+}
+.gradient-text-cyan-purple {
+  color: var(--accent-orange);
+  background: none;
+  -webkit-background-clip: unset;
+  -webkit-text-fill-color: unset;
+}
+
+/* Premium Buttons - Apple/Nike style */
+
+/* Bold Nike CTA (Solid Black / Solid White on Dark) */
+.btn-neon-pink {
+  background: var(--bg-dark);
+  color: var(--text-light);
+  border: 1px solid var(--bg-dark);
+  padding: 14px 28px;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 14px;
+  letter-spacing: 0.05em;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+.btn-neon-pink:hover {
+  background: #333333;
+  border-color: #333333;
+  transform: scale(1.02);
+}
+
+/* Minimal Apple CTA (Pill-shaped, clean grey or white border) */
+.btn-neon-cyan {
+  background: var(--bg-secondary);
+  color: var(--text-main);
+  border: 1px solid var(--border-light);
+  padding: 10px 20px;
+  font-weight: 600;
+  font-size: 13px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+.btn-neon-cyan:hover {
+  background: #e8e8ed;
+  border-color: rgba(0, 0, 0, 0.15);
+}
+
+/* Glass button */
+.btn-glass {
+  background: transparent;
+  color: var(--text-main);
+  border: 1px solid var(--text-main);
+  padding: 10px 22px;
+  font-weight: 600;
+  font-size: 13px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+.btn-glass:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* Remove glow backgrounds but keep class names so elements don't crash */
+.neon-glow-bg-left,
+.neon-glow-bg-right {
+  display: none;
+}
+
+/* Layout Containers */
+.app-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.grid-products {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 32px;
+}
+
+/* Input Fields (Apple Sleek Outline Style) */
+.form-input {
+  width: 100%;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  padding: 14px 18px;
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  outline: none;
+  transition: var(--transition-fast);
+}
+.form-input:focus {
+  border-color: var(--accent-orange);
+  background: var(--bg-primary);
+}
+
+.form-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
