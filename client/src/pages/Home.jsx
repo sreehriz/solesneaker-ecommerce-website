@@ -31,6 +31,16 @@ export default function Home() {
           Scroll animation: as hero exits viewport, shoe rotates.
           ═══════════════════════════════════════════════════════════ */}
       <section className="home-hero">
+        {/* Background Video Animation */}
+        <video 
+          className="home-hero__bg-video"
+          src="/banner/Red_Nike_shoe_spinning_slowly_202605250321.mp4"
+          autoPlay
+          loop
+          muted
+          playsInline
+        />
+
         {/* Background ambient orbs */}
         <div className="hero-orb hero-orb--r" />
         <div className="hero-orb hero-orb--l" />
@@ -215,10 +225,17 @@ export default function Home() {
           display: flex;
           align-items: center;
           overflow: hidden;
-          background-image: url("/banner/frame_001.png");
-          background-position: right 8% center;
-          background-size: 46%;
-          background-repeat: no-repeat;
+        }
+
+        .home-hero__bg-video {
+          position: absolute;
+          top: 0;
+          right: 0;
+          width: 50%;
+          height: 100%;
+          object-fit: contain;
+          z-index: 1;
+          pointer-events: none;
         }
 
         /* ── Hero layout ── */
@@ -398,9 +415,11 @@ export default function Home() {
            RESPONSIVE
            ════════════════════════════════ */
         @media (max-width: 900px) {
-          .home-hero {
-            background-position: center bottom 6%;
-            background-size: 55%;
+          .home-hero__bg-video {
+            width: 100%;
+            height: 48%;
+            top: auto;
+            bottom: 0;
           }
           .home-hero__inner {
             padding: 0 24px;
@@ -426,12 +445,6 @@ export default function Home() {
           }
           .home-hero__h1 {
             font-size: clamp(2.4rem, 8vw, 4rem);
-          }
-        }
-
-        @media (max-width: 480px) {
-          .home-hero {
-            background-size: 70%;
           }
         }
       `}</style>
