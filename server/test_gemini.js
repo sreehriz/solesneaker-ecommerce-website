@@ -1,7 +1,8 @@
-async function generateImage() {
-  const path = require('path');
+const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
-const apiKey = process.env.GEMINI_API_KEY;
+
+async function generateImage() {
+  const apiKey = process.env.GEMINI_API_KEY;
   // Use model name from list models output
   const url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`;
   
