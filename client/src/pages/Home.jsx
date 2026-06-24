@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../utils/api';
 import ProductCard from '../components/ProductCard';
@@ -8,6 +8,17 @@ import { ArrowRight, Package, Truck, Star } from 'lucide-react';
 export default function Home() {
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // 360 Rotation References
+  const canvasRef = useRef(null);
+  const imagesRef = useRef([]);
+  const stateRef = useRef({
+    currentIndex: 0,
+    targetIndex: 0,
+    isHovering: false,
+    autoRotateSpeed: 0.1, // rotation speed per frame
+  });
+  const idleTimeoutRef = useRef(null);
 
   useEffect(() => {
     async function fetchFeatured() {
@@ -23,6 +34,108 @@ export default function Home() {
     fetchFeatured();
   }, []);
 
+  useEffect(() => {
+    let animationFrameId;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const context = canvas.getContext('2d');
+
+    // Handle fullscreen resize
+    const handleResize = () => {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+
+    const renderFrame = () => {
+      const state = stateRef.current;
+      const images = imagesRef.current;
+
+      // Continuous slow rotation if user is not dragging/moving mouse
+      if (!state.isHovering) {
+        state.targetIndex = (state.targetIndex + state.autoRotateSpeed) % 100;
+      }
+
+      // Smooth interpolation
+      let diff = state.targetIndex - state.currentIndex;
+      if (!state.isHovering) {
+        // Wrap diff to shortest path in 360 circular list (100 frames)
+        if (diff < -50) diff += 100;
+        if (diff > 50) diff -= 100;
+      }
+      state.currentIndex = (state.currentIndex + diff * 0.08 + 100) % 100;
+
+      const frameIdx = Math.floor(state.currentIndex);
+      const img = images[frameIdx];
+
+      if (img && img.complete && img.naturalWidth !== 0) {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        // COVER-SCALE math (fills screen properly like background cover)
+        const scale = Math.max(
+          canvas.width / img.width,
+          canvas.height / img.height
+        );
+
+        const w = img.width * scale;
+        const h = img.height * scale;
+
+        // Position on desktop (centered on the canvas + right offset)
+        // Position on mobile (fully centered)
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const offsetX = window.innerWidth > 900 ? 80 * dpr : 0;
+        const x = canvas.width / 2 - w / 2 + offsetX;
+        const y = canvas.height / 2 - h / 2;
+
+        context.drawImage(img, x, y, w, h);
+      }
+
+      animationFrameId = requestAnimationFrame(renderFrame);
+    };
+
+    // Preload all 100 frames
+    const frameCount = 100;
+    const images = [];
+    for (let i = 1; i <= frameCount; i++) {
+      const img = new Image();
+      const frameNum = String(i).padStart(3, '0');
+      img.src = `/banner/frame_${frameNum}.png`;
+      images.push(img);
+    }
+    imagesRef.current = images;
+
+    // Start rendering
+    renderFrame();
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      window.removeEventListener('resize', handleResize);
+      if (idleTimeoutRef.current) clearTimeout(idleTimeoutRef.current);
+    };
+  }, []);
+
+  const handleMouseMove = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const percent = (e.clientX - rect.left) / rect.width;
+    stateRef.current.targetIndex = percent * 99;
+    stateRef.current.isHovering = true;
+
+    if (idleTimeoutRef.current) clearTimeout(idleTimeoutRef.current);
+    idleTimeoutRef.current = setTimeout(() => {
+      stateRef.current.isHovering = false;
+    }, 2500); // Resume auto-rotation after 2.5 seconds of inactivity
+  };
+
+  const handleMouseEnter = () => {
+    stateRef.current.isHovering = true;
+  };
+
+  const handleMouseLeave = () => {
+    stateRef.current.isHovering = false;
+  };
+
   return (
     <div style={{ position: 'relative', overflowX: 'hidden' }}>
 
@@ -30,60 +143,53 @@ export default function Home() {
           1. HERO SECTION — 100vh, no sticky tricks, always visible
           Scroll animation: as hero exits viewport, shoe rotates.
           ═══════════════════════════════════════════════════════════ */}
-      <section className="home-hero">
-        {/* Background Video Animation */}
-        <video 
-          className="home-hero__bg-video"
-          src="/banner/Red_Nike_shoe_spinning_slowly_202605250321.mp4"
-          autoPlay
-          loop
-          muted
-          playsInline
-        />
+      <section 
+        className="home-hero"
+        onMouseMove={handleMouseMove}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        {/* Fullscreen Canvas Background */}
+        <canvas ref={canvasRef} id="shoeCanvas" className="home-hero__canvas" />
 
         {/* Background ambient orbs */}
         <div className="hero-orb hero-orb--r" />
         <div className="hero-orb hero-orb--l" />
 
-        {/* Inner layout */}
-        <div className="home-hero__inner">
-
-          {/* ── LEFT: Text ── */}
-          <div className="home-hero__text">
-            {/* Live badge */}
-            <div className="hero-live-badge">
-              <span className="hero-live-badge__dot" />
-              <span>DROP 01 LIVE</span>
-            </div>
-
-            <h1 className="home-hero__h1">
-              STEP INTO{' '}<br />
-              THE FUTURE{' '}<br />
-              <span style={{ color: 'var(--accent-orange)' }}>OF SOLE.</span>
-            </h1>
-
-            <p className="home-hero__sub">
-              A curated high-performance sneaker vault powered by optimized Java
-              algorithms. Engineering meets street culture.
-            </p>
-
-            <div className="home-hero__actions">
-              <Link to="/shop" style={{ textDecoration: 'none' }}>
-                <button className="btn-neon-pink home-hero__cta">
-                  Shop Collection <ArrowRight size={15} style={{ marginLeft: 6 }} />
-                </button>
-              </Link>
-              <Link to="/shop" className="home-hero__link">
-                View All Releases <ArrowRight size={16} />
-              </Link>
-            </div>
-
-            <div className="home-hero__scroll-hint">
-              <span className="home-hero__scroll-line" />
-              <span>Scroll to explore</span>
-            </div>
+        {/* Floating Text content */}
+        <div className="home-hero__text">
+          {/* Live badge */}
+          <div className="hero-live-badge">
+            <span className="hero-live-badge__dot" />
+            <span>DROP 01 LIVE</span>
           </div>
 
+          <h1 className="home-hero__h1">
+            STEP INTO{' '}<br />
+            THE FUTURE{' '}<br />
+            <span style={{ color: 'var(--accent-orange)' }}>OF SOLE.</span>
+          </h1>
+
+          <p className="home-hero__sub">
+            A curated high-performance sneaker vault powered by optimized Java
+            algorithms. Engineering meets street culture.
+          </p>
+
+          <div className="home-hero__actions">
+            <Link to="/shop" style={{ textDecoration: 'none' }}>
+              <button className="btn-neon-pink home-hero__cta">
+                Shop Collection <ArrowRight size={15} style={{ marginLeft: 6 }} />
+              </button>
+            </Link>
+            <Link to="/shop" className="home-hero__link">
+              View All Releases <ArrowRight size={16} />
+            </Link>
+          </div>
+
+          <div className="home-hero__scroll-hint">
+            <span className="home-hero__scroll-line" />
+            <span>Scroll to explore</span>
+          </div>
         </div>
       </section>
 
@@ -217,68 +323,70 @@ export default function Home() {
           ═══════════════════════════════════════════════════════════ */}
       <style>{`
         .home-hero {
-          height: 100vh;
-          min-height: 600px;
           position: relative;
-          background-color: var(--bg-secondary);
-          border-bottom: 1px solid var(--border-light);
-          display: flex;
-          align-items: center;
+          height: 100vh;
+          width: 100%;
           overflow: hidden;
+          background: #000;
+          color: var(--text-light);
         }
 
-        .home-hero__bg-video {
+        /* ── Readability Gradient Overlay ── */
+        .home-hero::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(
+            to right,
+            rgba(0,0,0,0.85) 15%,
+            rgba(0,0,0,0.4) 40%,
+            rgba(0,0,0,0.1) 70%,
+            transparent 100%
+          );
+          pointer-events: none;
+          z-index: 3; /* sits above canvas, behind text */
+        }
+
+        /* ── Fullscreen Background Canvas ── */
+        .home-hero__canvas {
           position: absolute;
           top: 0;
-          right: 0;
-          width: 50%;
+          left: 0;
+          width: 100%;
           height: 100%;
-          object-fit: contain;
           z-index: 1;
           pointer-events: none;
         }
 
-        /* ── Hero layout ── */
-        .home-hero__inner {
-          max-width: 1400px;
-          width: 100%;
-          margin: 0 auto;
-          padding: 0 48px;
-          display: flex;
-          flex-direction: row;
-          align-items: center;
-          justify-content: space-between;
-          gap: 32px;
-          height: 100%;
-          position: relative;
-          z-index: 2;
-        }
-
-        /* ── Text side ── */
+        /* ── Floating Text content ── */
         .home-hero__text {
-          flex: 0 0 auto;
-          width: 48%;
-          max-width: 560px;
-          position: relative;
+          position: absolute;
+          top: 50%;
+          left: 6vw;
+          transform: translateY(-50%);
           z-index: 5;
+          max-width: 500px;
+          color: white;
         }
 
         .home-hero__h1 {
-          font-size: clamp(3rem, 5.2vw, 6rem);
+          font-size: clamp(3rem, 5vw, 5rem);
+          line-height: 1.05;
           font-weight: 900;
           text-transform: uppercase;
           letter-spacing: -0.03em;
-          line-height: 0.91;
-          color: var(--text-main);
+          color: var(--text-light);
           margin-bottom: 22px;
         }
 
         .home-hero__sub {
+          margin-top: 20px;
           font-size: 17px;
-          color: var(--text-muted);
+          color: #a1a1a6;
           line-height: 1.65;
           max-width: 420px;
           margin-bottom: 34px;
+          opacity: 0.8;
         }
 
         .home-hero__actions {
@@ -296,16 +404,20 @@ export default function Home() {
           font-weight: 700 !important;
           border-radius: 30px !important;
           letter-spacing: 0.04em !important;
+          background: var(--text-light) !important;
+          color: var(--bg-dark) !important;
+          border: 1px solid var(--text-light) !important;
           transition: transform 0.2s ease, background 0.2s ease !important;
         }
         .home-hero__cta:hover {
           transform: translateY(-2px) scale(1.03) !important;
-          background: #1a1a1a !important;
+          background: #ffffff !important;
+          box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2) !important;
         }
 
         .home-hero__link {
           text-decoration: none;
-          color: var(--text-main);
+          color: var(--text-light);
           font-weight: 700;
           font-size: 14px;
           display: flex;
@@ -339,31 +451,18 @@ export default function Home() {
           color: var(--text-muted);
         }
 
-        /* ── Canvas side ── */
-        .home-hero__canvas-wrap {
-          flex: 0 0 auto;
-          width: 50%;
-          /* ✅ Explicit height — canvas needs a real pixel height to size against */
-          height: calc(100vh - 80px);
-          max-height: 800px;
-          min-height: 400px;
-          position: relative;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
         /* ── Live badge ── */
         .hero-live-badge {
           display: inline-flex;
           align-items: center;
           gap: 8px;
-          background: var(--bg-primary);
+          background: rgba(255, 255, 255, 0.08);
+          backdrop-filter: blur(10px);
           padding: 5px 13px 5px 9px;
           border-radius: 20px;
-          border: 1px solid var(--border-light);
+          border: 1px solid var(--border-dark);
           margin-bottom: 22px;
-          box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+          box-shadow: 0 2px 10px rgba(0,0,0,0.2);
         }
         .hero-live-badge__dot {
           width: 7px; height: 7px;
@@ -402,7 +501,7 @@ export default function Home() {
         .hero-orb--l {
           width: 400px; height: 400px;
           left: 5%; bottom: -15%;
-          background: radial-gradient(circle, rgba(0,0,0,0.03) 0%, transparent 65%);
+          background: radial-gradient(circle, rgba(255,255,255,0.02) 0%, transparent 65%);
           filter: blur(90px);
           animation: orbFloat 18s ease-in-out infinite alternate-reverse;
         }
@@ -415,23 +514,26 @@ export default function Home() {
            RESPONSIVE
            ════════════════════════════════ */
         @media (max-width: 900px) {
-          .home-hero__bg-video {
-            width: 100%;
-            height: 48%;
-            top: auto;
-            bottom: 0;
-          }
-          .home-hero__inner {
-            padding: 0 24px;
-            flex-direction: column;
-            justify-content: flex-start;
-            padding-top: 60px;
-            text-align: center;
-            gap: 12px;
+          .home-hero::after {
+            background: linear-gradient(
+              to top,
+              rgba(0,0,0,0.85) 20%,
+              rgba(0,0,0,0.4) 60%,
+              transparent 100%
+            );
           }
           .home-hero__text {
-            width: 100%;
+            position: absolute;
+            top: auto;
+            bottom: 5vh;
+            left: 24px;
+            right: 24px;
+            transform: none;
             max-width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
           }
           .home-hero__sub {
             margin-left: auto;
@@ -444,7 +546,7 @@ export default function Home() {
             justify-content: center;
           }
           .home-hero__h1 {
-            font-size: clamp(2.4rem, 8vw, 4rem);
+            font-size: clamp(2.2rem, 8vw, 3.8rem);
           }
         }
       `}</style>
